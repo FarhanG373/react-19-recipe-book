@@ -1,0 +1,41 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
+* {
+  box-sizing: border-box;
+}
+body {
+  margin:0px;
+  padding:0px;
+  font-family: "Quicksand", sans-serif;
+}
+.marginBottom {
+  margin-bottom: 16px;;
+}
+
+.searchSection {
+  a {
+    margin-bottom: 16px;
+    display: block;
+  }
+  .cardImage {
+    width: 40px!important;
+  }
+  .cardHeading {
+    font-size: 14px;
+  }
+}
+
+
+@media only screen and (max-width: 767px) {
+  .mfg-card.mfg-list{
+    display: block !important;
+  }
+  .mfg-card.mfg-list .cardImage {
+    margin-bottom: 16px;
+  }
+  .mfg-card.mfg-list .cardImage {
+    width: 100% !important;
+  }
+  .mfg-card.mfg-list .cardContent.contentPadding {
+    padding: 0px !important;
+  }
+}
