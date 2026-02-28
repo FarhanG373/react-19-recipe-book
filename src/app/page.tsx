@@ -10,9 +10,9 @@ import {
   Button,
 } from "mfg-ui-components";
 import { getAll, searchApi } from "./apiServices/apiServices";
-import { use, Suspense, useState } from "react";
+import { use, Suspense, useState, useEffect } from "react";
 import ErrorBoundary from "./ErrorBoundary";
-
+import { clear } from "console";
 
 const promiseCache = new Map<string, Promise<unknown>>();
 function useQuery<T>({ fn, key }: { fn: () => Promise<T>; key: string }) {
@@ -24,10 +24,12 @@ function useQuery<T>({ fn, key }: { fn: () => Promise<T>; key: string }) {
   return result;
 }
 
-
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [dataSearch, setDataSearch] = useState([]);
+  const [handalSelect, setHandleSelect] = useState<
+    { id: number; title: any; timestamp: string }[]
+  >([]);
 
   const data = useQuery({
     fn: () => getAll(),
@@ -46,6 +48,31 @@ export default function Home() {
     setSearchQuery("");
     setDataSearch([]);
   };
+
+  const handleSelectChange = (item: any) => {
+    let newItm = {
+      id: Date.now(),
+      title: item.name,
+      timestamp: new Date().toLocaleString(),
+    };
+    setHandleSelect((prev) => [newItm, ...prev]);
+    localStorage.setItem(
+      "selectedItems",
+      JSON.stringify([newItm, ...handalSelect]),
+    );
+  };
+  useEffect(() => {
+    const storedItems = localStorage.getItem("selectedItems");
+    if (storedItems) {
+      setHandleSelect(JSON.parse(storedItems));
+    }
+  }, []);
+
+  const clearSelectedItems = () => {
+    setHandleSelect([]);
+    localStorage.removeItem("selectedItems");
+  };
+
   return (
     <main>
       <Suspense
@@ -72,18 +99,79 @@ export default function Home() {
                 >
                   {dataSearch.map((item: any) => {
                     return (
-                      <a key={ item.id} href={`/single/${item.id}`}>
-                        <Card
+                      <>
+                        <Button
+                          link={`/single/${item.id}`}
                           key={item.id}
-                          cardHeading={item.name}
-                          CardImagePath={item.image}
-                          CardImageAlt={item.name}
-                          CardView="mfg-list"
-                      />
-                        </a>
+                          onClick={() => handleSelectChange(item)}
+                        >
+                          <Card
+                            key={item.id}
+                            cardHeading={item.name}
+                            CardImagePath={item.image}
+                            CardImageAlt={item.name}
+                            CardView="mfg-list"
+                          />
+                        </Button>
+                      </>
                     );
                   })}
                 </Search>
+                <>
+                  {handalSelect.length > 0 && (
+                    <h4
+                      style={{
+                        marginBottom: "20px",
+                        marginTop: "20px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      Selected History
+                      <Button
+                        onClick={clearSelectedItems}
+                        ButtonClass="mfg-danger"
+                      >
+                        Clear History
+                      </Button>
+                    </h4>
+                  )}
+                  {handalSelect.map((item) => {
+                    return (
+                      <div
+                        key={item.id}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          borderBottom: "1px solid #ccc",
+                          padding: "10px 0",
+                        }}
+                      >
+                        <h5>{item.title}</h5>
+                        <div>
+                          {" "}
+                          <span
+                            style={{ fontSize: "11px", marginRight: "20px" }}
+                          >
+                            {item.timestamp}
+                          </span>
+                          <Button
+                            onClick={() =>
+                              setHandleSelect((prev) =>
+                                prev.filter((itm) => itm.id !== item.id),
+                              )
+                            }
+                            ButtonClass="mfg-danger"
+                          >
+                            X
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
               </Flex>
               {data &&
                 data.map((item: any) => {
